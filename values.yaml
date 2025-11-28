@@ -52,7 +52,7 @@ securityContext: {}
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: NodePort
+  type: LoadBalancer
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
   nodePort: 31106
@@ -166,5 +166,54 @@ customHtml: |
   <body>
     <h1> Hello Deployment Team!</h1>
     <p>This is my custom Helm chart for my deployment plan</p>
+    <br>
+    <br>
+    <h2>What changes have I made?</h2>
+    <br>
+    <h3>Configured latest nginx image pull</h3>
+    <p>Just to pull the latest image</p>
+    <pre>
+      image:
+      repository: nginx
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    </pre>
+    <br>
+    <h3>Configured a LoadBalancer/NodePort service</h3>
+    <p>For enabling a port that can be used to expose to the internet</p>
+    <pre>
+      service:
+      type: LoadBalancer
+      port: 80
+      nodePort: 31106
+    </pre>
+    <br>
+    <h3>Volume and VolumeMounts for NGINX directory to display this page</p>
+    <br>
+    <pre>
+      volumes:
+      - name: web-content
+        configMap:
+          name: hello-deployment-html
+
+      volumeMounts:
+      - name: web-content
+        mountPath: "/usr/share/nginx/html"
+        readOnly: true
+      </pre>
+      <br>
+      <h3>A configmap resource for simple Nginx config</h3>
+      <br>
+      <pre>
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: hello-deployment-html
+          labels:
+            {{- include "hello-deployment.labels" . | nindent 4 }}
+        data:
+          index.html: |
+        {{- .Values.customHtml | nindent 4 }}
+      </pre>
   </body>
   </html>
